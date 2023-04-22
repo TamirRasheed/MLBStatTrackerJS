@@ -10,6 +10,10 @@ router.get('/', async (req, res) => {
       `http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=${date}&endDate=${date}`
     );
     const gamedata = response.data.dates[0].games.map((game) => {
+      const awayScore = game.teams.away.score || 0;
+  const homeScore = game.teams.home.score || 0;
+
+    
       return {
         GameID: game.gamePk,
         HomeTeam: game.teams.home.team.name,
@@ -18,13 +22,16 @@ router.get('/', async (req, res) => {
         AwayTeamRecord: game.teams.away.leagueRecord,
         DateTime: game.gameDate,
         Status: game.status.abstractGameState,
-        Winner: game.teams.home.score > game.teams.away.score ? game.teams.home.team.name : game.teams.away.team.name,
+        homeScore: homeScore,
+        awayScore: awayScore,
         Inning: game.linescore?.currentInningOrdinal || "N/A"
       };
-    });
+    }
+    );
     res.send(gamedata);
   } catch (error) {
     console.error(error);
+    res.status(500).send('Error retrieving game data');
   }
 });
 
